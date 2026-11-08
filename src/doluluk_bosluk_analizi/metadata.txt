@@ -1,0 +1,18 @@
+[general]
+name=Figure-Ground & Solid-Void Analyzer
+qgisMinimumVersion=3.22
+qgisMaximumVersion=4.99
+supportsQt6=True
+description=Analyzes urban figure-ground coverage and solid-void ratios by aggregating building footprint areas into planning zones with bilingual EN/TR support in EPSG:5253.
+about=Calculates zone-level solid-void (figure-ground) ratios by aggregating building footprint areas within planning zones. Provides automatic EPSG:5253 planar area calculations, dual Turkish and English UI & attribute field names, Nolli-inspired graduated styling, and real-time summary KPIs.
+version=1.0.0
+author=Baran Adsuna
+email=baranadsuna@gmail.com
+repository=https://github.com/baranadsuna/qgis_plugin
+tracker=https://github.com/baranadsuna/qgis_plugin/issues
+tags=urban planning, figure ground, solid void, building footprint, coverage ratio, doluluk bosluk, EPSG:5253, Nolli
+category=Analysis
+icon=icon.svg
+experimental=False
+deprecated=False
+license=GPL-2.0-or-later
