@@ -3,7 +3,7 @@
 **Standard Coordinate Reference System**: `EPSG:5253` (TUREF / TM30)  
 **Compatibility**: QGIS 3.22+ and QGIS 4.0+ (Qt5 & Qt6 Compatible)  
 **Author**: Baran Adsuna (Dokuz Eylül University, Department of Urban and Regional Planning)  
-**Latest Version**: `1.2.1` (Universal Multi-Language Release — Verified for `plugins.qgis.org`)
+**Latest Version**: `1.2.2` (Universal Multi-Language Release — Verified for `plugins.qgis.org`)
 
 ---
 

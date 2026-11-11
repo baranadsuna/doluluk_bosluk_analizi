@@ -41,19 +41,23 @@ plugin.initGui()
 
 dlg = FigureGroundDialog(None, iface, language="tr")
 print("TR Title:", dlg.windowTitle())
-assert "Doluluk Boşluk" in dlg.windowTitle()
+if "Doluluk Boşluk" not in dlg.windowTitle():
+    raise AssertionError("Expected 'Doluluk Boşluk' in TR title")
 
 dlg.lang_combo.setCurrentIndex(1)  # switch to EN
 print("EN Title:", dlg.windowTitle())
-assert "Figure-Ground" in dlg.windowTitle()
+if "Figure-Ground" not in dlg.windowTitle():
+    raise AssertionError("Expected 'Figure-Ground' in EN title")
 
 dlg.set_language("zh")  # switch to ZH
 print("ZH Title:", dlg.windowTitle())
-assert "图底与实虚比" in dlg.windowTitle()
+if "图底与实虚比" not in dlg.windowTitle():
+    raise AssertionError("Expected '图底与实虚比' in ZH title")
 
 dlg.set_language("id")  # switch to ID
 print("ID Title:", dlg.windowTitle())
-assert "Solid-Void" in dlg.windowTitle()
+if "Solid-Void" not in dlg.windowTitle():
+    raise AssertionError("Expected 'Solid-Void' in ID title")
 
 plugin.unload()
 qgs.exitQgis()

@@ -13,7 +13,7 @@ about=Figure-Ground & Building Coverage Analyzer makes it simple to analyze urba
  - 4 Languages with Live Switching: English, Turkish, Chinese, and Indonesian.
  - High Performance: Fast spatial indexing powered by QgsSpatialIndex.
  - QGIS 3 and QGIS 4 / Qt5 and Qt6 Ready.
-version=1.2.1
+version=1.2.2
 author=Baran Adsuna
 email=baranadsuna@gmail.com
 homepage=https://github.com/baranadsuna/doluluk_bosluk_analizi

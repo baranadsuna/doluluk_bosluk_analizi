@@ -308,8 +308,8 @@ class FigureGroundDialog(QDialog):
         self.setMinimumSize(540, 480)
         self.resize(650, 560)
         self.setSizePolicy(
-            QSizePolicy.Policy.Expanding if hasattr(QSizePolicy, "Policy") else QSizePolicy.Expanding,
-            QSizePolicy.Policy.Expanding if hasattr(QSizePolicy, "Policy") else QSizePolicy.Expanding,
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
         )
 
         self.setStyleSheet("""
@@ -551,9 +551,7 @@ class FigureGroundDialog(QDialog):
         self.tab_params = QWidget()
         params_scroll = QScrollArea()
         params_scroll.setWidgetResizable(True)
-        params_scroll.setFrameShape(
-            QFrame.Shape.NoFrame if hasattr(QFrame, "Shape") else QFrame.NoFrame
-        )
+        params_scroll.setFrameShape(QFrame.Shape.NoFrame)
         params_scroll.setStyleSheet("QScrollArea { background: transparent; border: none; }")
 
         params_inner = QWidget()
@@ -745,11 +743,7 @@ class FigureGroundDialog(QDialog):
         # Results Table
         self.table = QTableWidget(0, 7)
         self.table.setAlternatingRowColors(True)
-        self.table.setSelectionBehavior(
-            QAbstractItemView.SelectionBehavior.SelectRows
-            if hasattr(QAbstractItemView, "SelectionBehavior")
-            else QAbstractItemView.SelectRows
-        )
+        self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.horizontalHeader().setStretchLastSection(True)
         res_vbox.addWidget(self.table, stretch=1)
 
@@ -1192,15 +1186,4 @@ class FigureGroundDialog(QDialog):
         except Exception as err:
             QMessageBox.critical(self, "Error", f"Failed to export CSV: {err}")
 
-    def exec(self) -> int:
-        """Qt6 and QGIS 4 compatible exec shim."""
-        exec_func = getattr(super(), "exec", None)
-        if callable(exec_func):
-            return exec_func()
-        exec_old = getattr(super(), "exec_", None)
-        if callable(exec_old):
-            return exec_old()
-        return 0
 
-    def exec_(self) -> int:
-        return self.exec()
