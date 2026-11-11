@@ -1,17 +1,25 @@
 [general]
-name=Figure-Ground & Solid-Void Analyzer
+name=Figure-Ground & Building Coverage Analyzer
 qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
 supportsQt6=True
-description=Calculates urban building footprint coverage and solid-void ratios across planning zones in EPSG:5253 with universal 4-language support (EN, TR, ZH, ID).
-about=Figure-Ground & Solid-Void Analyzer aggregates building footprints into urban planning zones to compute figure-ground coverage and open-space void ratios. Supports both spatial overlay aggregation and direct attribute modes, distortion-free EPSG:5253 planar metric accuracy, universal 4-language support with live UI switching (English, Turkish, Chinese, Indonesian), adaptive graduated styling (Urban Heatmap, Nolli Grayscale, Eco-Traffic), responsive scrollable dialog, and instant summary KPI cards. Fully compatible with QGIS 3.22+ and QGIS 4.0+ (Qt5 and Qt6).
-version=1.2.0
+description=Calculate building footprint coverage and solid-void ratios (Nolli analysis) across planning zones, parcels, or blocks with instant 4-language support (EN, TR, ZH, ID).
+about=Figure-Ground & Building Coverage Analyzer makes it simple to analyze urban built density and open space ratios. Whether you are an urban planner, architect, GIS analyst, or researcher, this tool helps you evaluate spatial enclosure, building coverage ratios (BCR / TAKS), and open space permeability.
+ Features:
+ - Universal Calculation: Works in both Spatial Overlay mode (aggregating building polygons into zones with boundary-containment) and Direct Attribute mode (single-layer calculation).
+ - Adaptive Nolli and Heatmap Symbology: Automatically styles output maps with balanced 5-class graduated colors (Urban Warm Heatmap, Nolli Grayscale, or Eco-Traffic).
+ - Instant KPI Dashboard: Displays overall coverage percentage, void ratio, building count, and density metrics.
+ - Export Ready: One-click export to GeoPackage, shapefile, CSV, and clipboard.
+ - 4 Languages with Live Switching: English, Turkish, Chinese, and Indonesian.
+ - High Performance: Fast spatial indexing powered by QgsSpatialIndex.
+ - QGIS 3 and QGIS 4 / Qt5 and Qt6 Ready.
+version=1.2.1
 author=Baran Adsuna
 email=baranadsuna@gmail.com
-homepage=https://baranadsuna.github.io/qgis_plugin/
-repository=https://github.com/baranadsuna/qgis_plugin
-tracker=https://github.com/baranadsuna/qgis_plugin/issues
-tags=urban planning, figure ground, solid void, building footprint, coverage ratio, doluluk bosluk, EPSG:5253, Nolli, multilingual, i18n, morphology, chinese, indonesian
+homepage=https://github.com/baranadsuna/doluluk_bosluk_analizi
+repository=https://github.com/baranadsuna/doluluk_bosluk_analizi
+tracker=https://github.com/baranadsuna/doluluk_bosluk_analizi/issues
+tags=urban planning, figure ground, solid void, building footprint, coverage ratio, doluluk bosluk, nolli, bcr, urban density, morphology, multilingual
 category=Analysis
 icon=icon.svg
 experimental=False

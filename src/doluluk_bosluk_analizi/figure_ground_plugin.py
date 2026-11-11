@@ -37,7 +37,7 @@ class FigureGroundPlugin:
 
         self.action = QAction(
             icon,
-            self.tr("Figure-Ground & Solid-Void Analyzer (EPSG:5253)"),
+            self.tr("Figure-Ground & Building Coverage Analyzer"),
             self.iface.mainWindow(),
         )
         self.action.setStatusTip(
