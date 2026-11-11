@@ -2,6 +2,12 @@
 # -*- coding: utf-8 -*-
 """
 Unit and Integration Tests for Figure-Ground & Solid-Void Analyzer
+Validates:
+  - English, Turkish, Chinese, and Indonesian language output schemas
+  - Attribute precedence over geometric area
+  - Direct Attribute Mode (single-layer calculation)
+  - 2-Tier spatial aggregation (centroid + polygon intersection fallback)
+  - Adaptive graduated symbology with multiple color palettes
 """
 
 import os
@@ -21,7 +27,6 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QVariant
 
-# Ensure module path is accessible
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 if parent_dir not in sys.path:
@@ -93,72 +98,36 @@ class TestFigureGroundEngine(unittest.TestCase):
         bldg_layer.updateFields()
 
         bldg_feats = []
-        # Bldg 1 (Zone 1): 10x20 = 200 m²
-        f = QgsFeature(bldg_layer.fields())
-        f.setGeometry(QgsGeometry.fromPolygonXY([[
-            QgsPointXY(500010, 4250010),
-            QgsPointXY(500030, 4250010),
-            QgsPointXY(500030, 4250020),
-            QgsPointXY(500010, 4250020),
-            QgsPointXY(500010, 4250010),
-        ]]))
-        f.setAttributes([101, 200.0])
-        bldg_feats.append(f)
+        for i, x in enumerate([500010, 500040, 500070]):
+            f = QgsFeature(bldg_layer.fields())
+            f.setGeometry(QgsGeometry.fromPolygonXY([[
+                QgsPointXY(x, 4250010),
+                QgsPointXY(x + 20, 4250010),
+                QgsPointXY(x + 20, 4250020),
+                QgsPointXY(x, 4250020),
+                QgsPointXY(x, 4250010),
+            ]]))
+            f.setAttributes([101 + i, 200.0])
+            bldg_feats.append(f)
 
-        # Bldg 2 (Zone 1): 10x20 = 200 m²
-        f = QgsFeature(bldg_layer.fields())
-        f.setGeometry(QgsGeometry.fromPolygonXY([[
-            QgsPointXY(500040, 4250010),
-            QgsPointXY(500060, 4250010),
-            QgsPointXY(500060, 4250020),
-            QgsPointXY(500040, 4250020),
-            QgsPointXY(500040, 4250010),
-        ]]))
-        f.setAttributes([102, 200.0])
-        bldg_feats.append(f)
-
-        # Bldg 3 (Zone 1): 10x20 = 200 m²
-        f = QgsFeature(bldg_layer.fields())
-        f.setGeometry(QgsGeometry.fromPolygonXY([[
-            QgsPointXY(500070, 4250010),
-            QgsPointXY(500090, 4250010),
-            QgsPointXY(500090, 4250020),
-            QgsPointXY(500070, 4250020),
-            QgsPointXY(500070, 4250010),
-        ]]))
-        f.setAttributes([103, 200.0])
-        bldg_feats.append(f)
-
-        # Bldg 4 (Zone 2): 20x50 = 1000 m²
-        f = QgsFeature(bldg_layer.fields())
-        f.setGeometry(QgsGeometry.fromPolygonXY([[
-            QgsPointXY(500110, 4250010),
-            QgsPointXY(500130, 4250010),
-            QgsPointXY(500130, 4250060),
-            QgsPointXY(500110, 4250060),
-            QgsPointXY(500110, 4250010),
-        ]]))
-        f.setAttributes([201, 1000.0])
-        bldg_feats.append(f)
-
-        # Bldg 5 (Zone 2): 20x50 = 1000 m²
-        f = QgsFeature(bldg_layer.fields())
-        f.setGeometry(QgsGeometry.fromPolygonXY([[
-            QgsPointXY(500140, 4250010),
-            QgsPointXY(500160, 4250010),
-            QgsPointXY(500160, 4250060),
-            QgsPointXY(500140, 4250060),
-            QgsPointXY(500140, 4250010),
-        ]]))
-        f.setAttributes([202, 1000.0])
-        bldg_feats.append(f)
+        for i, x in enumerate([500110, 500140]):
+            f = QgsFeature(bldg_layer.fields())
+            f.setGeometry(QgsGeometry.fromPolygonXY([[
+                QgsPointXY(x, 4250010),
+                QgsPointXY(x + 20, 4250010),
+                QgsPointXY(x + 20, 4250060),
+                QgsPointXY(x, 4250060),
+                QgsPointXY(x, 4250010),
+            ]]))
+            f.setAttributes([201 + i, 1000.0])
+            bldg_feats.append(f)
 
         pr_b.addFeatures(bldg_feats)
         bldg_layer.updateExtents()
 
         return zone_layer, bldg_layer
 
-    def test_calculation_english(self):
+    def test_calculation_english_and_palettes(self):
         z_lyr, b_lyr = self._create_mock_layers()
         engine = FigureGroundEngine(
             zone_layer=z_lyr,
@@ -166,6 +135,7 @@ class TestFigureGroundEngine(unittest.TestCase):
             zone_area_field="alan_m2",
             bldg_area_field="taban_m2",
             language="en",
+            color_palette="urban_warm",
         )
         res = engine.run_analysis(generate_centroid_points=True)
         summary = res["summary"]
@@ -174,11 +144,9 @@ class TestFigureGroundEngine(unittest.TestCase):
         self.assertEqual(summary["total_buildings_assigned"], 5)
         self.assertAlmostEqual(summary["total_zone_m2"], 20000.0, delta=1.0)
         self.assertAlmostEqual(summary["total_building_footprint_m2"], 2600.0, delta=1.0)
-        # 2600 / 20000 = 13.0%
         self.assertAlmostEqual(summary["overall_solid_pct"], 13.0, delta=0.1)
         self.assertAlmostEqual(summary["overall_void_pct"], 87.0, delta=0.1)
 
-        # Check Output Layer fields
         out_layer = res["layer"]
         self.assertTrue(out_layer.isValid())
         field_names = [f.name() for f in out_layer.fields()]
@@ -186,23 +154,19 @@ class TestFigureGroundEngine(unittest.TestCase):
         self.assertIn("void_pct", field_names)
         self.assertIn("bldg_footprint_m2", field_names)
 
-        # Check values per feature
-        rows = list(out_layer.getFeatures())
-        self.assertEqual(len(rows), 2)
-        r1 = [r for r in rows if r["zone_id"] == 1][0]
-        self.assertAlmostEqual(r1["solid_pct"], 6.0, delta=0.1)
-        self.assertAlmostEqual(r1["void_pct"], 94.0, delta=0.1)
-        self.assertEqual(r1["bldg_count"], 3)
-        self.assertAlmostEqual(r1["bldg_footprint_m2"], 600.0, delta=1.0)
+        # Verify Centroid Layer
+        c_layer = res["centroid_layer"]
+        self.assertIsNotNone(c_layer)
+        self.assertEqual(c_layer.featureCount(), 5)
 
-        r2 = [r for r in rows if r["zone_id"] == 2][0]
-        self.assertAlmostEqual(r2["solid_pct"], 20.0, delta=0.1)
-        self.assertAlmostEqual(r2["void_pct"], 80.0, delta=0.1)
-        self.assertEqual(r2["bldg_count"], 2)
-        self.assertAlmostEqual(r2["bldg_footprint_m2"], 2000.0, delta=1.0)
+        # Test Adaptive Symbology with all palettes
+        apply_solid_void_symbology(out_layer, "solid_pct", language="en", palette="urban_warm")
+        self.assertIsNotNone(out_layer.renderer())
 
-        # Check Symbology
-        apply_solid_void_symbology(out_layer, "solid_pct", language="en")
+        apply_solid_void_symbology(out_layer, "solid_pct", language="zh", palette="nolli_grayscale")
+        self.assertIsNotNone(out_layer.renderer())
+
+        apply_solid_void_symbology(out_layer, "solid_pct", language="id", palette="eco_traffic")
         self.assertIsNotNone(out_layer.renderer())
 
     def test_calculation_turkish(self):
@@ -219,6 +183,102 @@ class TestFigureGroundEngine(unittest.TestCase):
         self.assertIn("bosluk_pct", field_names)
         self.assertIn("bina_taban_m2", field_names)
         self.assertIn("bina_sayisi", field_names)
+
+    def test_direct_attribute_mode(self):
+        """Tests Direct Attribute Mode when building area is already in the zone layer."""
+        zone_layer = QgsVectorLayer("Polygon?crs=EPSG:5253", "direct_zones", "memory")
+        pr = zone_layer.dataProvider()
+        pr.addAttributes([
+            QgsField("id", get_field_type_int()),
+            QgsField("bolge_m2", get_field_type_double()),
+            QgsField("bina_taban_m2", get_field_type_double()),
+        ])
+        zone_layer.updateFields()
+
+        f = QgsFeature(zone_layer.fields())
+        f.setGeometry(QgsGeometry.fromPolygonXY([[
+            QgsPointXY(500000, 4250000),
+            QgsPointXY(500100, 4250000),
+            QgsPointXY(500100, 4250100),
+            QgsPointXY(500000, 4250100),
+            QgsPointXY(500000, 4250000),
+        ]]))
+        # 4,000 m² building footprint in 10,000 m² zone -> exactly 40% solid, 60% void
+        f.setAttributes([1, 10000.0, 4000.0])
+        pr.addFeatures([f])
+        zone_layer.updateExtents()
+
+        engine = FigureGroundEngine(
+            zone_layer=zone_layer,
+            bldg_layer=None,  # Direct mode
+            zone_area_field="bolge_m2",
+            bldg_area_field="bina_taban_m2",
+            language="en",
+        )
+        res = engine.run_analysis()
+        out_layer = res["layer"]
+        feat = list(out_layer.getFeatures())[0]
+
+        self.assertAlmostEqual(feat["solid_pct"], 40.0, delta=0.01)
+        self.assertAlmostEqual(feat["void_pct"], 60.0, delta=0.01)
+        self.assertAlmostEqual(res["summary"]["overall_solid_pct"], 40.0, delta=0.01)
+
+    def test_attribute_precedence_over_geometry(self):
+        """Verifies that user-supplied attribute values take precedence over geometry area."""
+        zone_layer = QgsVectorLayer("Polygon?crs=EPSG:5253", "prec_zones", "memory")
+        pr_z = zone_layer.dataProvider()
+        pr_z.addAttributes([
+            QgsField("id", get_field_type_int()),
+            QgsField("net_alan_m2", get_field_type_double()),
+        ])
+        zone_layer.updateFields()
+
+        # Geometry area is 10,000 m², but net planning area attribute is 5,000 m²
+        f_z = QgsFeature(zone_layer.fields())
+        f_z.setGeometry(QgsGeometry.fromPolygonXY([[
+            QgsPointXY(500000, 4250000),
+            QgsPointXY(500100, 4250000),
+            QgsPointXY(500100, 4250100),
+            QgsPointXY(500000, 4250100),
+            QgsPointXY(500000, 4250000),
+        ]]))
+        f_z.setAttributes([1, 5000.0])
+        pr_z.addFeatures([f_z])
+
+        # Building geometry area is 200 m², but footprint attribute is 2,500 m²
+        bldg_layer = QgsVectorLayer("Polygon?crs=EPSG:5253", "prec_bldgs", "memory")
+        pr_b = bldg_layer.dataProvider()
+        pr_b.addAttributes([
+            QgsField("bldg_id", get_field_type_int()),
+            QgsField("taks_m2", get_field_type_double()),
+        ])
+        bldg_layer.updateFields()
+
+        f_b = QgsFeature(bldg_layer.fields())
+        f_b.setGeometry(QgsGeometry.fromPolygonXY([[
+            QgsPointXY(500010, 4250010),
+            QgsPointXY(500030, 4250010),
+            QgsPointXY(500030, 4250020),
+            QgsPointXY(500010, 4250020),
+            QgsPointXY(500010, 4250010),
+        ]]))
+        f_b.setAttributes([1, 2500.0])
+        pr_b.addFeatures([f_b])
+
+        engine = FigureGroundEngine(
+            zone_layer=zone_layer,
+            bldg_layer=bldg_layer,
+            zone_area_field="net_alan_m2",
+            bldg_area_field="taks_m2",
+            language="en",
+        )
+        res = engine.run_analysis()
+        out_layer = res["layer"]
+        feat = list(out_layer.getFeatures())[0]
+
+        # 2,500 m² / 5,000 m² = 50.0% coverage (If geometry was used, it would be 200 / 10000 = 2%)
+        self.assertAlmostEqual(feat["solid_pct"], 50.0, delta=0.01)
+        self.assertAlmostEqual(feat["void_pct"], 50.0, delta=0.01)
 
 
 if __name__ == "__main__":

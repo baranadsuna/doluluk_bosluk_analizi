@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+Smoke and UI Lifecycle Tests for Figure-Ground & Solid-Void Analyzer
+Validates instantiation, 4-language switching (EN, TR, ZH, ID), and cleanup.
+"""
+
 import os
 import sys
 
@@ -42,6 +47,14 @@ dlg.lang_combo.setCurrentIndex(1)  # switch to EN
 print("EN Title:", dlg.windowTitle())
 assert "Figure-Ground" in dlg.windowTitle()
 
+dlg.set_language("zh")  # switch to ZH
+print("ZH Title:", dlg.windowTitle())
+assert "图底与实虚比" in dlg.windowTitle()
+
+dlg.set_language("id")  # switch to ID
+print("ID Title:", dlg.windowTitle())
+assert "Solid-Void" in dlg.windowTitle()
+
 plugin.unload()
 qgs.exitQgis()
-print("[OK] FigureGroundPlugin lifecycle and UI dialog verified successfully!")
+print("[OK] FigureGroundPlugin lifecycle and 4-language UI dialog verified successfully!")

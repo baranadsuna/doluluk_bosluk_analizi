@@ -3,6 +3,8 @@
 """
 Figure-Ground & Solid-Void Analyzer Plugin Entry Point
 ======================================================
+Provides seamless integration with QGIS desktop menu and toolbar,
+supporting dual English and Turkish language environments.
 """
 
 import os
@@ -55,8 +57,8 @@ class FigureGroundPlugin:
             self.action = None
 
     def run(self):
-        # Default to Turkish if user environment or QGIS locale is Turkish, else English
+        # Default to English (or Turkish if QGIS locale is explicitly Turkish)
         locale = QCoreApplication.instance().property("locale") or ""
-        lang = "tr" if "tr" in str(locale).lower() else "tr"  # Default TR for local workstation
+        lang = "tr" if "tr" in str(locale).lower() else "en"
         self.dlg = FigureGroundDialog(self.iface.mainWindow(), self.iface, language=lang)
         self.dlg.exec()
